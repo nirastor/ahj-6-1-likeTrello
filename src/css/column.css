@@ -1,0 +1,75 @@
+.column {
+  padding: 20px 10px;
+  background-color: #ebecf0;
+  border-radius: 6px;
+}
+
+.column-title {
+  font-weight: bold;
+  margin-bottom: 10px;
+  padding-left: 10px;
+}
+
+.column-addtask {
+  display: inline-flex;
+  color: #888;
+  cursor: pointer;
+  transition: all .15s ease;
+  padding: 6px;
+  padding-right: 12px;
+  border-radius: 4px;
+}
+
+.column-addtask:hover {
+  color: black;
+  background-color: #ccc;
+}
+
+.add-dialog-text {
+  width: 100%;
+  background-color: white;
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  box-shadow: 1px 1px 5px #888;
+  font-family: Roboto, "Segoe UI", Arial, sans-serif;
+  font-size: 16px;
+  resize: vertical;
+}
+
+.add-dialog-text:focus {
+  outline: none;
+}
+
+.add-dialog-text::placeholder {
+  font-family: Roboto, "Segoe UI", Arial, sans-serif;
+  font-size: 16px;
+}
+
+.add-dialog-controls {
+  display: flex;
+  align-items: center;
+}
+
+.add-dialog-confirm {
+  color: white;
+  background-color: #5aac44;
+  cursor: pointer;
+  padding: 6px 20px;
+  border-radius: 4px;
+  margin-right: 12px;
+  transition: all .15s ease;
+}
+
+.add-dialog-confirm:hover {
+  background-color: #61bd4f;
+}
+
+.add-dialog-cancel {
+  color: #888;
+  transition: all .15s ease;
+}
+
+.add-dialog-cancel:hover {
+  color: black;
+}
