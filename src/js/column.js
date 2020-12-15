@@ -2,7 +2,8 @@ import Card from './card';
 import randomLoremIpsum from './randomLoremIpsum';
 
 export default class Column {
-  constructor(appContainerEl, title, id, appCallbacks) {
+  constructor(appContainerEl, columnContainerEl, title, id, appCallbacks) {
+    this.columnContainerEl = columnContainerEl;
     this.appContainerEl = appContainerEl;
     this.title = title;
     this.id = id;
@@ -30,11 +31,13 @@ export default class Column {
       <div class="column" data-col-id="${this.id}">
         <div class="column-title">${this.title}</div>
         <div class="column-task-list"></div>
-        <div class="column-addtask">
-          <svg class="column-addtask-plus" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path opacity="0.54" fill-rule="evenodd" clip-rule="evenodd" d="M11 5V11H5V13H11V19H13V13H19V11H13V5H11Z" fill="currentcolor"/>
-          </svg>
-          <span class="column-addtask-text">Добавить</span>
+        <div class="dropable dropable-controls">
+          <div class="column-addtask">
+            <svg class="column-addtask-plus" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path opacity="0.54" fill-rule="evenodd" clip-rule="evenodd" d="M11 5V11H5V13H11V19H13V13H19V11H13V5H11Z" fill="currentcolor"/>
+            </svg>
+            <span class="column-addtask-text">Добавить</span>
+          </div>
         </div>
         <div class="column-add-dialog display-none">
           <textarea class="add-dialog-text" placeholder="Новая задача"></textarea>
@@ -47,7 +50,7 @@ export default class Column {
         </div>
       </div>
     `;
-    this.appContainerEl.appendChild(this.colEl);
+    this.columnContainerEl.appendChild(this.colEl);
     this.searchElements();
     this.initListeners();
     this.createRandomCards();
@@ -97,21 +100,42 @@ export default class Column {
       // show some err mesage here
       return;
     }
-    this.addCard(text);
+    this.addNewCard(text);
     this.closeAddDialog();
   }
 
-  addCard(text) {
-    const newCard = new Card(text, this.appCallbacks.getNextCardId());
+  addCard(isNew, text, cardId = this.appCallbacks.getNextCardId(), beforeId) {
+    const newCard = new Card(
+      this.appContainerEl,
+      text,
+      cardId,
+      {
+        addCard: this.addCard.bind(this),
+      },
+      {
+        getColumnElById: this.appCallbacks.getColumnElById,
+        getCardPosition: this.appCallbacks.getCardPosition,
+        removeCard: this.appCallbacks.removeCard,
+      },
+    );
     newCard.create();
-    this.colTaskList.appendChild(newCard.getCardEl());
-    this.appCallbacks.addCard();
+    if (isNew) {
+      this.appCallbacks.updateNextCardId();
+      this.appCallbacks.addCard(this.id, newCard);
+    }
+
+    if (!beforeId) {
+      this.colTaskList.appendChild(newCard.getCardEl());
+    } else {
+      const beforeEl = document.getElementById(beforeId);
+      this.colTaskList.insertBefore(newCard.getCardEl(), beforeEl);
+    }
   }
 
   createRandomCards() {
     const numOfCards = 1 + Math.floor(Math.random() * 4);
     for (let i = 0; i < numOfCards; i += 1) {
-      this.addCard(randomLoremIpsum());
+      this.addCard(true, randomLoremIpsum());
     }
   }
 }
