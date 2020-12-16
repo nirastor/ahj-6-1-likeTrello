@@ -2,7 +2,7 @@ import Column from './column';
 
 class App {
   constructor() {
-    this.LOCALSTORAGE_NAME = 'niRastorsTaskManager';
+    this.LOCALSTORAGE_NAME = 'niRastorsLikeTrello';
     this.NUM_OF_COLUMNNS = 3;
     this.nextCardId = 1;
     this.nextColId = 1;

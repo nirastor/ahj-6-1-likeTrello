@@ -4,7 +4,7 @@
 ## Task Manager
 
 Сборка:  
-https://nirastor.github.io/ahj-6-1-liketrello/
+https://nirastor.github.io/ahj-6-1-likeTrello/
 
 ## Комментарии
 
