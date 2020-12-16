@@ -24,7 +24,7 @@ export default class Column {
     this.appCallbacks = appCallbacks;
   }
 
-  init() {
+  init(cards) {
     this.colEl = document.createElement('div');
     this.colEl.classList.add('column-wrapper');
     this.colEl.innerHTML = `
@@ -53,7 +53,13 @@ export default class Column {
     this.columnContainerEl.appendChild(this.colEl);
     this.searchElements();
     this.initListeners();
-    this.createRandomCards();
+    if (cards) {
+      cards.forEach((card) => {
+        this.loadSavedCard(card.text, card.id);
+      });
+    } else {
+      this.createRandomCards();
+    }
   }
 
   searchElements() {
@@ -86,6 +92,7 @@ export default class Column {
   openAddDialog() {
     this.colAddDialog.classList.remove('display-none');
     this.colAddDialogOpenBtn.classList.add('display-none');
+    this.colAddDialogText.focus();
   }
 
   closeAddDialog() {
@@ -100,42 +107,79 @@ export default class Column {
       // show some err mesage here
       return;
     }
-    this.addNewCard(text);
+    this.createCardByUser(text);
     this.closeAddDialog();
   }
 
-  addCard(isNew, text, cardId = this.appCallbacks.getNextCardId(), beforeId) {
+  createCard(text, id) {
     const newCard = new Card(
       this.appContainerEl,
       text,
-      cardId,
+      id,
       {
-        addCard: this.addCard.bind(this),
+        returnCardToOriginalPosition: this.returnCardToOriginalPosition.bind(this),
+        removeCard: this.removeCard.bind(this),
+        moveCard: this.moveCard.bind(this),
       },
       {
         getColumnElById: this.appCallbacks.getColumnElById,
         getCardPosition: this.appCallbacks.getCardPosition,
-        removeCard: this.appCallbacks.removeCard,
       },
     );
     newCard.create();
-    if (isNew) {
-      this.appCallbacks.updateNextCardId();
-      this.appCallbacks.addCard(this.id, newCard);
-    }
+    return newCard;
+  }
 
-    if (!beforeId) {
-      this.colTaskList.appendChild(newCard.getCardEl());
+  setCardToPosition(card, position) {
+    const { nextCardId } = position;
+    if (nextCardId) {
+      const nextEl = document.getElementById(nextCardId);
+      this.colTaskList.insertBefore(card.getCardEl(), nextEl);
     } else {
-      const beforeEl = document.getElementById(beforeId);
-      this.colTaskList.insertBefore(newCard.getCardEl(), beforeEl);
+      this.colTaskList.appendChild(card.getCardEl());
     }
+  }
+
+  loadSavedCard(text, id) {
+    const card = this.createCard(text, id);
+    this.addLastCard(card);
+  }
+
+  createCardByUser(text) {
+    const id = this.appCallbacks.getNextCardId(true);
+    const card = this.createCard(text, id);
+    this.addLastCard(card);
+  }
+
+  addLastCard(card) {
+    this.colTaskList.appendChild(card.getCardEl());
+    const position = {
+      columnId: this.id,
+      nextCardId: 0,
+    };
+    this.appCallbacks.addCard(card, position);
+  }
+
+  returnCardToOriginalPosition(text, id, position) {
+    const card = this.createCard(text, id);
+    this.setCardToPosition(card, position);
+  }
+
+  removeCard(id) {
+    this.appCallbacks.removeCard(id);
+  }
+
+  moveCard(text, id, position) {
+    const card = this.createCard(text, id);
+    this.setCardToPosition(card, position);
+    this.appCallbacks.removeCard(id);
+    this.appCallbacks.addCard(card, position);
   }
 
   createRandomCards() {
     const numOfCards = 1 + Math.floor(Math.random() * 4);
     for (let i = 0; i < numOfCards; i += 1) {
-      this.addCard(true, randomLoremIpsum());
+      this.createCardByUser(randomLoremIpsum());
     }
   }
 }

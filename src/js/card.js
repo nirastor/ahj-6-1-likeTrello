@@ -52,7 +52,7 @@ export default class Card {
   }
 
   delete() {
-    this.appCallbacks.removeCard(this.id);
+    this.columnCallbacks.removeCard(this.id);
     this.cardEl.remove();
   }
 
@@ -77,7 +77,6 @@ export default class Card {
     }
 
     this.move.el = e.currentTarget;
-    console.log(this.move.el);
 
     this.move.originalPosition = this.appCallbacks.getCardPosition(this.id);
     // if (this.move.originalPosition.nextCardId) {
@@ -165,34 +164,31 @@ export default class Card {
       return;
     }
 
-    const underCard = targetEl.closest('.dropable-card');
-    const underControls = targetEl.closest('.dropable-controls');
-    const drop = underCard || underControls;
+    const nextIsCard = targetEl.closest('.dropable-card');
+    const nextIsControls = targetEl.closest('.dropable-controls');
+    const drop = nextIsCard || nextIsControls;
 
     if (!drop) {
       this.returnToOriginalPosition();
       return;
     }
 
-    if (underControls) {
-      this.move.el.classList.remove('drag');
-      const columnId = Number(drop.closest('.column').dataset.colId);
-      const column = this.appCallbacks.getColumnElById(columnId);
-      column.addCard(false, this.text, this.id);
-    }
+    const columnId = Number(drop.closest('.column').dataset.colId);
+    const column = this.appCallbacks.getColumnElById(columnId);
 
-    if (underCard) {
-      console.log('drop before card)');
-    }
+    const position = {
+      columnId,
+      nextCardId: nextIsCard ? nextIsCard.id : 0,
+    };
+
+    column.moveCard(this.text, this.id, position);
 
     this.clearDnD();
   }
 
   returnToOriginalPosition() {
-    console.log('return to orig');
-    console.log(this.move.originalPosition);
-    const column = this.appCallbacks.getColumnElById(this.move.originalPosition.colId);
-    column.addCard(false, this.text, this.id, this.move.originalPosition.nextCardId);
+    const column = this.appCallbacks.getColumnElById(this.move.originalPosition.columnId);
+    column.returnCardToOriginalPosition(this.text, this.id, this.move.originalPosition);
     this.clearDnD();
   }
 
